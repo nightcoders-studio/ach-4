@@ -8,7 +8,7 @@ import "../design.css";
 
 type UiState = "loading" | "invalid" | "ready" | "scanning" | "verified" | "duplicate" | "notfound";
 
-function LiveClock({ dark = false }: { dark?: boolean }) {
+function LiveClock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 50);
@@ -17,7 +17,7 @@ function LiveClock({ dark = false }: { dark?: boolean }) {
   const p2 = (n: number) => String(n).padStart(2, "0");
   const p3 = (n: number) => String(n).padStart(3, "0");
   return (
-    <div className="rounded-lg px-4 py-2 font-mono text-xl font-bold" style={{ background: dark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.08)" }}>
+    <div className="inline-block rounded-lg px-4 py-2 font-mono text-2xl font-bold" style={{ background: "rgba(91,255,161,0.1)", color: "var(--green)" }}>
       {p2(now.getHours())}:{p2(now.getMinutes())}:{p2(now.getSeconds())}:{p3(now.getMilliseconds())} WIB
     </div>
   );
@@ -44,13 +44,11 @@ export default function ScanPage() {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const lockRef = useRef(false);
 
-  // baca eventId dari URL
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("eventId");
     setEventId(id);
   }, []);
 
-  // unduh data event tsb
   useEffect(() => {
     if (eventId === undefined) return;
     if (!eventId) {
@@ -156,36 +154,47 @@ export default function ScanPage() {
     );
   }
 
+  // ===== VERIFIED (dark + neon hijau) =====
   if (ui === "verified") {
     return (
-      <div onClick={backToReady} className="flex min-h-screen cursor-pointer flex-col items-center justify-center gap-4 p-6 text-center text-black" style={{ background: "var(--green-bright)" }}>
-        <span className="material-symbols-outlined text-8xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-        <h1 className="text-4xl font-bold">VERIFIED ✅</h1>
-        <h2 className="text-2xl font-bold">{lastScanned?.name}</h2>
-        <LiveClock dark />
-        {lastScanned?.signature_url && (
-          <div className="mt-2 flex h-32 w-full max-w-xs items-center justify-center rounded-xl bg-white">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={lastScanned.signature_url} alt="Tanda tangan" className="max-h-28" />
+      <div onClick={backToReady} className="bd flex min-h-screen cursor-pointer flex-col items-center justify-center p-6 text-center">
+        <div className="glass neon-green w-full max-w-sm rounded-3xl p-8" style={{ borderColor: "rgba(91,255,161,0.4)" }}>
+          <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full" style={{ background: "rgba(91,255,161,0.12)" }}>
+            <span className="material-symbols-outlined text-6xl" style={{ color: "var(--green)", fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           </div>
-        )}
-        <p className="text-sm opacity-70">(ketuk layar untuk scan berikutnya)</p>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em]" style={{ color: "var(--green)" }}>Verified</p>
+          <h1 className="mb-5 text-3xl font-bold">{lastScanned?.name}</h1>
+          <LiveClock />
+          {lastScanned?.signature_url && (
+            <div className="mt-6 flex h-28 items-center justify-center rounded-xl bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={lastScanned.signature_url} alt="Tanda tangan" className="max-h-24" />
+            </div>
+          )}
+        </div>
+        <p className="mt-6 text-sm" style={{ color: "var(--on-surface-variant)" }}>Ketuk layar untuk scan berikutnya</p>
       </div>
     );
   }
 
+  // ===== DITOLAK (dark + neon merah) =====
   if (ui === "duplicate") {
     const t = lastScanned?.check_in_time ? new Date(lastScanned.check_in_time).toLocaleTimeString("id-ID") + " WIB" : "-";
     return (
-      <div onClick={backToReady} className="flex min-h-screen cursor-pointer flex-col items-center justify-center gap-5 p-6 text-center" style={{ background: "var(--error)", color: "var(--on-error)" }}>
-        <span className="material-symbols-outlined text-8xl" style={{ fontVariationSettings: "'FILL' 1" }}>cancel</span>
-        <h1 className="text-4xl font-bold">DITOLAK</h1>
-        <div className="w-full max-w-xs rounded-xl bg-white/20 p-4">
-          <p className="text-lg font-bold">SUDAH CHECK-IN PADA</p>
-          <p className="font-mono text-xl">{t}</p>
+      <div onClick={backToReady} className="bd flex min-h-screen cursor-pointer flex-col items-center justify-center p-6 text-center">
+        <div className="glass w-full max-w-sm rounded-3xl p-8" style={{ borderColor: "rgba(255,180,171,0.4)", boxShadow: "0 0 22px rgba(255,180,171,0.25)" }}>
+          <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full" style={{ background: "rgba(255,180,171,0.12)" }}>
+            <span className="material-symbols-outlined text-6xl" style={{ color: "var(--error)", fontVariationSettings: "'FILL' 1" }}>cancel</span>
+          </div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em]" style={{ color: "var(--error)" }}>Ditolak</p>
+          <h1 className="mb-5 text-2xl font-bold">Sudah Check-in</h1>
+          <div className="rounded-xl p-4" style={{ background: "rgba(255,180,171,0.1)" }}>
+            <p className="text-xs uppercase tracking-widest" style={{ color: "var(--on-surface-variant)" }}>Waktu check-in</p>
+            <p className="font-mono text-xl font-bold" style={{ color: "var(--error)" }}>{t}</p>
+          </div>
+          {lastScanned?.name && <p className="mt-4" style={{ color: "var(--on-surface-variant)" }}>{lastScanned.name}</p>}
         </div>
-        {lastScanned?.name && <p>{lastScanned.name}</p>}
-        <p className="text-sm opacity-70">(ketuk layar untuk scan berikutnya)</p>
+        <p className="mt-6 text-sm" style={{ color: "var(--on-surface-variant)" }}>Ketuk layar untuk scan berikutnya</p>
       </div>
     );
   }

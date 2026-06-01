@@ -17,11 +17,42 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [full, setFull] = useState(false);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("eventId");
     setEventId(id);
   }, []);
+
+  // cek limit: true kalau kuota sudah penuh
+  const isAtCapacity = async (): Promise<boolean> => {
+    if (!eventId) return false;
+    const { data: ev } = await supabase
+      .from("events")
+      .select("expected_participants")
+      .eq("id", eventId)
+      .single();
+    const cap = ev?.expected_participants ?? null;
+    if (!cap) return false; // kosong = unlimited
+    const { count } = await supabase
+      .from("participants")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId);
+    return (count ?? 0) >= cap;
+  };
+
+  // cek kuota saat halaman dibuka
+  useEffect(() => {
+    if (!eventId) return;
+    let active = true;
+    isAtCapacity().then((f) => {
+      if (active && f) setFull(true);
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId]);
 
   const handleSubmit = async () => {
     setError(null);
@@ -40,6 +71,12 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
+      // cek ulang kuota sebelum simpan
+      if (await isAtCapacity()) {
+        setFull(true);
+        return;
+      }
+
       const signature = sigRef.current!.toJPEG(0.3);
       const { data, error } = await supabase
         .from("participants")
@@ -76,7 +113,7 @@ export default function RegisterPage() {
     sigRef.current?.clear();
   };
 
-  // Link invalid (tidak ada eventId)
+  // ===== Link tidak valid =====
   if (eventId === null) {
     return (
       <div className="bd flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
@@ -85,9 +122,29 @@ export default function RegisterPage() {
         <p className="max-w-sm text-sm" style={{ color: "var(--on-surface-variant)" }}>
           Minta link pendaftaran ke penyelenggara acara, atau buat event baru.
         </p>
-        <Link href="/create" className="rounded-lg px-6 py-3 font-bold" style={{ background: "var(--green)", color: "var(--on-green)" }}>
-          Buat Event
-        </Link>
+        <Link href="/create" className="rounded-lg px-6 py-3 font-bold" style={{ background: "var(--green)", color: "var(--on-green)" }}>Buat Event</Link>
+      </div>
+    );
+  }
+
+  // ===== Kuota penuh =====
+  if (full) {
+    return (
+      <div className="bd flex min-h-screen flex-col">
+        <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-white/5 bg-black/60 px-4 backdrop-blur-xl md:px-10">
+          <span className="material-symbols-outlined" style={{ color: "var(--on-surface-variant)" }}>layers</span>
+          <span className="text-lg font-bold">bdForms</span>
+          <span className="material-symbols-outlined" style={{ color: "var(--on-surface-variant)" }}>account_circle</span>
+        </header>
+        <main className="flex flex-grow items-center justify-center px-4 pt-28 pb-16">
+          <div className="glass w-full max-w-md rounded-2xl p-8 text-center">
+            <span className="material-symbols-outlined mb-4 text-7xl" style={{ color: "var(--error)" }}>event_busy</span>
+            <h1 className="mb-3 text-2xl font-bold">Pendaftaran Penuh</h1>
+            <p className="text-sm" style={{ color: "var(--on-surface-variant)" }}>
+              Kuota peserta untuk acara ini sudah penuh. Silakan hubungi penyelenggara acara.
+            </p>
+          </div>
+        </main>
       </div>
     );
   }

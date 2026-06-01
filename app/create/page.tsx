@@ -50,6 +50,7 @@ export default function CreateEventPage() {
 
   const regLink = eventId ? `${origin}/register?eventId=${eventId}` : "";
   const scanLink = eventId ? `${origin}/scan?eventId=${eventId}` : "";
+  const dashLink = eventId ? `${origin}/dashboard?eventId=${eventId}` : "";
 
   const copy = (text: string, key: string) => {
     navigator.clipboard?.writeText(text);
@@ -71,7 +72,7 @@ export default function CreateEventPage() {
         <Link href="/" className="mb-8 flex items-center gap-2">
           <span className="material-symbols-outlined" style={{ color: "var(--green)" }}>wifi_off</span>
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--green)" }}>
-             Fast Registration Platform
+            Offline-First Registration Platform
           </span>
         </Link>
         <h1 className="mb-4 max-w-3xl text-3xl font-bold md:text-5xl">
@@ -103,8 +104,8 @@ export default function CreateEventPage() {
                 <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bd-input w-full rounded-lg px-4 py-3" style={{ colorScheme: "dark" }} />
               </div>
               <div>
-                <label className="mb-2 block text-xs uppercase tracking-widest" style={{ color: "var(--on-surface-variant)" }}>Perkiraan Peserta</label>
-                <input type="number" value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="500" className="bd-input w-full rounded-lg px-4 py-3" />
+                <label className="mb-2 block text-xs uppercase tracking-widest" style={{ color: "var(--on-surface-variant)" }}>Maksimal Peserta</label>
+                <input type="number" value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="cth: 100 (kosongkan = unlimited)" className="bd-input w-full rounded-lg px-4 py-3" />
               </div>
             </div>
 
@@ -148,6 +149,7 @@ export default function CreateEventPage() {
               {[
                 { label: "Pendaftaran Peserta (bagi ke tamu via WA)", link: regLink, key: "reg", dot: "var(--primary)" },
                 { label: "Scanner (buat panitia)", link: scanLink, key: "scan", dot: "var(--green)" },
+                { label: "Dashboard Pemantauan (buat kamu)", link: dashLink, key: "dash", dot: "var(--cyan)" },
               ].map((l) => (
                 <div key={l.key} className="mb-5">
                   <label className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest" style={{ color: "var(--on-surface-variant)" }}>
