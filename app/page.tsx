@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SiteNav } from "@/components/SiteNav";
 import "./design.css";
 
 const HERO_IMG =
@@ -7,10 +6,101 @@ const HERO_IMG =
 
 const LOGOS = ["Aceh Hackathon", "Barika Coffee and Space", "Nightcoder", "Egg Geak"];
 
+const DOCS = [
+  {
+    col: "Documentation",
+    items: [
+      { i: "rocket_launch", t: "Getting Started", d: "Start building in minutes" },
+      { i: "group", t: "Participant Registration", d: "Digital sign-up flows" },
+      { i: "qr_code_2", t: "QR Check-In", d: "Instant gate validation" },
+    ],
+  },
+  {
+    col: "Modules",
+    items: [
+      { i: "verified_user", t: "Anti-Fraud Verification", d: "Secure attendee identity" },
+      { i: "monitoring", t: "Analytics & Reports", d: "Real-time event insights" },
+      { i: "hub", t: "System Architecture", d: "Offline-first infrastructure" },
+    ],
+  },
+];
+
+const SOLUTIONS = [
+  {
+    col: "Event Types",
+    items: [
+      { i: "school", t: "Campus Events", d: "Universitas & organisasi mahasiswa" },
+      { i: "cast_for_education", t: "Seminar & Workshop", d: "Professional learning sessions" },
+      { i: "diversity_3", t: "Communities & Organizations", d: "Clubs & NGO gatherings" },
+    ],
+  },
+  {
+    col: "Use Cases",
+    items: [
+      { i: "timer_off", t: "Reduce Registration Queue", d: "Faster check-in at the gate" },
+      { i: "gpp_bad", t: "Prevent Attendance Fraud", d: "Verified entry only" },
+      { i: "history_edu", t: "Paperless Registration", d: "Fully digital workflows" },
+    ],
+  },
+];
+
+type Group = { col: string; items: { i: string; t: string; d: string }[] };
+
+function Dropdown({ label, groups }: { label: string; groups: Group[] }) {
+  return (
+    <div className="bd-menu">
+      <button className="flex items-center gap-1 text-sm font-medium hover:opacity-80" style={{ color: "var(--on-surface-variant)" }}>
+        {label}
+        <span className="material-symbols-outlined text-base">expand_more</span>
+      </button>
+      <div className="bd-mega">
+        <div className="glass rounded-2xl p-6" style={{ width: 580, maxWidth: "90vw", background: "rgba(10,10,10,0.97)" }}>
+          <div className="grid grid-cols-2 gap-x-8">
+            {groups.map((g) => (
+              <div key={g.col}>
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(186,201,205,0.5)" }}>{g.col}</p>
+                <div className="flex flex-col gap-1">
+                  {g.items.map((it) => (
+                    <a key={it.t} href="#" className="flex items-start gap-3 rounded-xl p-2 hover:bg-white/5">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: "rgba(0,224,255,0.1)" }}>
+                        <span className="material-symbols-outlined text-[20px]" style={{ color: "var(--primary)" }}>{it.i}</span>
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold" style={{ color: "var(--on-surface)" }}>{it.t}</span>
+                        <span className="block text-xs" style={{ color: "var(--on-surface-variant)" }}>{it.d}</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="bd">
-      <SiteNav active="product" />
+      {/* Nav */}
+      <nav className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-b border-white/5 bg-black/70 px-6 backdrop-blur-xl md:px-10">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-[28px]" style={{ color: "var(--primary)" }}>layers</span>
+          <span className="text-xl font-bold" style={{ color: "var(--primary)" }}>bdForms</span>
+        </div>
+        <div className="hidden items-center gap-8 md:flex">
+          <Link href="/" className="border-b-2 pb-1 text-sm font-bold" style={{ color: "var(--green)", borderColor: "var(--green)" }}>Product</Link>
+          <Dropdown label="Docs" groups={DOCS} />
+          <Dropdown label="Solutions" groups={SOLUTIONS} />
+          <Link href="/pricing" className="text-sm font-medium hover:opacity-80" style={{ color: "var(--on-surface-variant)" }}>Pricing</Link>
+        </div>
+        <div className="flex items-center gap-6">
+          <Link href="/create" className="hidden text-sm hover:opacity-80 sm:block" style={{ color: "var(--on-surface-variant)" }}>Login</Link>
+          <Link href="/create" className="rounded-full px-6 py-2.5 text-sm font-bold neon-green" style={{ background: "var(--green)", color: "var(--on-green)" }}>Get Started</Link>
+        </div>
+      </nav>
 
       {/* Hero */}
       <section className="relative overflow-hidden px-6 pt-40 pb-20 md:px-10">
@@ -19,13 +109,13 @@ export default function LandingPage() {
         <div className="relative z-10 mx-auto text-center">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5" style={{ borderColor: "rgba(59,73,76,0.5)", background: "var(--surface-low)" }}>
             <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: "var(--green)" }} />
-            <span className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Fast. Secure. offline-first.</span>
+            <span className="text-xs" style={{ color: "var(--on-surface-variant)" }}>Fast. Secure. Offline-First.</span>
           </div>
           <h1 className="mx-auto mb-6 max-w-4xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
             Fast-Track Registration Under <span className="gradient-text">3 Seconds</span>
           </h1>
           <p className="mx-auto mb-12 max-w-2xl text-base md:text-lg" style={{ color: "var(--on-surface-variant)" }}>
-            Sistem registrasi event. Tanpa antrian, tanpa kendala sinyal, dan proses validasi instan untuk pengalaman tamu yang eksklusif.
+            Sistem registrasi event termutakhir di Indonesia. Tanpa antrian, tanpa kendala sinyal, dan proses validasi instan untuk pengalaman tamu yang eksklusif.
           </p>
           <div className="mb-20 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/create" className="rounded-xl px-8 py-4 text-base font-bold neon-cyan" style={{ background: "var(--primary-container)", color: "var(--on-primary-container)" }}>Start Free Trial</Link>
